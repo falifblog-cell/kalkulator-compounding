@@ -48,28 +48,33 @@ jenis_kiraan = st.radio("Pilih cara kira % pulangan:",
 
 kadar_pulangan = 0.0
 
-# --- PILIHAN A: MANUAL ---
+# --- PILIHAN A: MANUAL (UPDATED 0.25 step, Max 50%) ---
 if "Manual" in jenis_kiraan:
-    st.info("Masukkan anggaran pulangan tetap setiap tahun (Contoh: ASB 5%, Saham 10%).")
-    kadar_pulangan = st.slider("Anggaran Pulangan (%)", 1.0, 30.0, 6.0, 0.5)
+    st.info("Masukkan anggaran pulangan tetap setiap tahun.")
+    # Step tukar jadi 0.25, Max tukar jadi 50.0
+    kadar_pulangan = st.slider("Anggaran Pulangan (%)", min_value=1.0, max_value=50.0, value=6.0, step=0.25)
 
-# --- PILIHAN B: REKOD LEPAS (AVERAGE) ---
+# --- PILIHAN B: REKOD LEPAS (UPDATED 5 TAHUN) ---
 else:
-    st.warning("Masukkan rekod pulangan portfolio anda untuk 3 tahun lepas.")
+    st.warning("Masukkan rekod pulangan portfolio anda untuk 5 tahun lepas.")
     
-    # Guna Expander supaya nampak macam "Add Button"
-    # Dia kemas, tak panjang berjela.
-    c1, c2, c3 = st.columns(3)
-    y1 = c1.number_input("Tahun 1 (%)", value=12.0)
-    y2 = c2.number_input("Tahun 2 (%)", value=5.0)
-    y3 = c3.number_input("Tahun 3 (%)", value=8.0)
-    
-    # Logic Kira Average
-    avg_rate = (y1 + y2 + y3) / 3
-    kadar_pulangan = avg_rate
-    
-    st.write("---")
-    st.success(f"Purata Pulangan (Average): **{avg_rate:.2f}%**")
+    # Guna Expander supaya nampak kemas
+    with st.expander("📝 Masukkan Data 5 Tahun Terkini", expanded=True):
+        # Kita buat 5 column supaya muat sebaris (atau auto stack kat mobile)
+        c1, c2, c3, c4, c5 = st.columns(5)
+        
+        y1 = c1.number_input("Tahun 1 (%)", value=12.0)
+        y2 = c2.number_input("Tahun 2 (%)", value=5.0)
+        y3 = c3.number_input("Tahun 3 (%)", value=8.0)
+        y4 = c4.number_input("Tahun 4 (%)", value=10.0)
+        y5 = c5.number_input("Tahun 5 (%)", value=6.0)
+        
+        # Logic Kira Average (Bahagi 5)
+        avg_rate = (y1 + y2 + y3 + y4 + y5) / 5
+        kadar_pulangan = avg_rate
+        
+        st.write("---")
+        st.success(f"Purata Pulangan (Average): **{avg_rate:.2f}%**")
 
 st.divider()
 
