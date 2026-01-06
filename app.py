@@ -1,66 +1,79 @@
 import streamlit as st
 import pandas as pd
 
-# --- SETUP PAGE ---
+# --- 1. SETUP PAGE ---
 st.set_page_config(page_title="Magic Compounding Calculator", page_icon="✨", layout="centered")
 
-# --- CSS SIKIT BAGI CANTIK ---
-st.markdown("""
-    <style>
-    .stApp { background-color: #f5f7f9; }
-    .stMetric { background-color: #ffffff; padding: 15px; border-radius: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.05); }
-    </style>
-""", unsafe_allow_html=True)
+# --- 2. SIDEBAR (TEMA) ---
+with st.sidebar:
+    st.header("⚙️ Tetapan")
+    tema = st.radio("Pilih Tema:", ["🌙 Mode Gelap (Dark)", "☀️ Mode Cerah (Light)"])
+    
+    st.divider()
+    st.info("Kalkulator ini membantu anda melihat potensi simpanan jangka masa panjang.")
 
-# --- TAJUK ---
+# --- CSS TEMA (Dark/Light) ---
+if tema == "☀️ Mode Cerah (Light)":
+    st.markdown("""
+        <style>
+            .stApp { background-color: #ffffff; color: #000000; }
+            .stNumberInput input { color: #000000 !important; background-color: #f0f2f6 !important; }
+            .stMarkdown, .stText, p, label, .stMetricLabel { color: #000000 !important; }
+            div[data-testid="stMetricValue"] { color: #000000 !important; }
+        </style>
+    """, unsafe_allow_html=True)
+
+# --- 3. TAJUK ---
 st.title("✨ Magic of Compounding")
 st.caption("Lihat bagaimana wang kecil menjadi bukit dengan kuasa faedah kompaun.")
 
-# --- BAHAGIAN 1: INPUT MODAL ---
+# --- 4. INPUT MODAL ---
 st.subheader("1. Tetapan Modal")
 col1, col2, col3 = st.columns(3)
+
+# Default values
 modal_awal = col1.number_input("💰 Modal Awal (RM)", value=1000.0, step=100.0)
 topup_bulanan = col2.number_input("➕ Topup Bulanan (RM)", value=200.0, step=50.0)
 tempoh_tahun = col3.number_input("⏳ Tempoh (Tahun)", value=10, step=1)
 
 st.divider()
 
-# --- BAHAGIAN 2: PILIHAN RETURN (YANG TUAN NAK) ---
+# --- 5. PILIHAN RETURN (PENTING) ---
 st.subheader("2. Tetapan Pulangan (%)")
 
-# Kita guna Radio Button untuk pilih Mode
+# Radio button bertindak sebagai suis. Pilih satu, yang lain sorok.
 jenis_kiraan = st.radio("Pilih cara kira % pulangan:", 
-                        ["A. Set % Sendiri (Fixed)", "B. Ikut Rekod Lama (Average)"], 
+                        ["A. Set % Sendiri (Manual)", "B. Kira Ikut Rekod Lepas (Average)"], 
                         horizontal=True)
 
 kadar_pulangan = 0.0
 
 # --- PILIHAN A: MANUAL ---
-if "Set % Sendiri" in jenis_kiraan:
+if "Manual" in jenis_kiraan:
     st.info("Masukkan anggaran pulangan tetap setiap tahun (Contoh: ASB 5%, Saham 10%).")
     kadar_pulangan = st.slider("Anggaran Pulangan (%)", 1.0, 30.0, 6.0, 0.5)
 
-# --- PILIHAN B: REKOD LAMA (AVERAGE) ---
+# --- PILIHAN B: REKOD LEPAS (AVERAGE) ---
 else:
-    st.info("Masukkan rekod pulangan portfolio anda untuk 3 tahun lepas.")
+    st.warning("Masukkan rekod pulangan portfolio anda untuk 3 tahun lepas.")
     
-    # Guna Expander supaya tak semak, "Bila nak guna baru buka"
-    with st.expander("📝 Masukkan Data Tahunan", expanded=True):
-        c1, c2, c3 = st.columns(3)
-        y1 = c1.number_input("Tahun 1 (%)", value=12.0)
-        y2 = c2.number_input("Tahun 2 (%)", value=5.0)
-        y3 = c3.number_input("Tahun 3 (%)", value=8.0)
-        
-        # Kira Average
-        avg_rate = (y1 + y2 + y3) / 3
-        kadar_pulangan = avg_rate
-        
-        st.write("---")
-        st.success(f"Purata Pulangan: **{avg_rate:.2f}%**")
+    # Guna Expander supaya nampak macam "Add Button"
+    # Dia kemas, tak panjang berjela.
+    c1, c2, c3 = st.columns(3)
+    y1 = c1.number_input("Tahun 1 (%)", value=12.0)
+    y2 = c2.number_input("Tahun 2 (%)", value=5.0)
+    y3 = c3.number_input("Tahun 3 (%)", value=8.0)
+    
+    # Logic Kira Average
+    avg_rate = (y1 + y2 + y3) / 3
+    kadar_pulangan = avg_rate
+    
+    st.write("---")
+    st.success(f"Purata Pulangan (Average): **{avg_rate:.2f}%**")
 
 st.divider()
 
-# --- BAHAGIAN 3: KIRAAN & OUTPUT ---
+# --- 6. KIRAAN & OUTPUT ---
 if st.button("🚀 Jana Kekayaan Saya", type="primary"):
     
     # Logik Matematik Compounding
@@ -109,18 +122,9 @@ if st.button("🚀 Jana Kekayaan Saya", type="primary"):
     })
     df = df.set_index("Tahun")
     
-    st.line_chart(df, color=["#00CC96", "#EF553B"]) # Hijau & Merah
+    st.write("### 📉 Graf Pertumbuhan Aset")
+    st.line_chart(df, color=["#00CC96", "#EF553B"]) # Hijau (Untung) & Merah (Modal)
     
-    # Table (Optional - Sorok dalam expander)
+    # Table (Disorok dalam expander supaya tak semak)
     with st.expander("Lihat Jadual Terperinci Tahunan"):
         st.dataframe(df)
-
-# --- SIDEBAR INFO ---
-with st.sidebar:
-    st.header("💡 Tips")
-    st.info("""
-    **Formula 72:**
-    Bahagikan 72 dengan % pulangan untuk tahu berapa tahun duit anda akan berganda (2x).
-    
-    *Contoh: 72 / 6% = 12 Tahun untuk double.*
-    """)
